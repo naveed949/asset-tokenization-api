@@ -25,7 +25,7 @@ const getContracts = () =>{
     let contracts = {
         rinkeby:{
             System:{
-                address:'0x577b7725B20F9117216B770cC6c8e301eca2110F',
+                address:'0xb954650d1A4bCB6C79BC2cAff80Ef826B6C605f4',
                 abi: System.abi
             },
             AssetTokenization:{

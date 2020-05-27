@@ -14,5 +14,6 @@ router.post("/approve",erc20Controller.approve);
 router.post("/transferFrom",erc20Controller.transferFrom);
 router.post("/getTotalSupply",erc20Controller.getTotalSupply);
 router.post("/getName",erc20Controller.getName);
+router.post("/issueTokens",erc20Controller.issueTokens);
 
 module.exports = router;

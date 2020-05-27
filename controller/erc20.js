@@ -1,9 +1,8 @@
 const wallet = require("ethereumjs-wallet");
 const Web3 = require('web3');
-const EthereumTx = require('ethereumjs-tx');
+const validator = require('../utils/validator');
 
 const ethUtils = require("../utils/eth");
-const { all } = require("../router/erc20");
 
 function createAccount(req,res){
     try{
@@ -29,24 +28,30 @@ function createAccount(req,res){
 
 }
 async function tokenize(req,res){
+    if(! validator.applyValidations(req,res,4)){
+        return;
+    }
+
     let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
     let privateKey = req.body.privateKey;
-    let account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey);
+    if(privateKey.indexOf('0x') == -1)
+        privateKey = '0x'+privateKey
+    let account = web3.eth.accounts.privateKeyToAccount(privateKey);
     web3.eth.accounts.wallet.add(account);
     web3.eth.defaultAccount = account.address;
 
     let name = req.body.name //"Asset";
     let symbol = req.body.symbol // "AST";
     let supply = req.body.supply //100;
-    let owner = req.body.owner;
     // let estimateGas = await System.methods.createToken(name,symbol,supply,owner).estimateGas(); // ()
     // console.log(estimateGas);
-    System.methods.createToken(name,symbol,supply,owner).send({from: web3.eth.defaultAccount,gas:100000})
+    System.methods.tokenize(name,symbol,supply).send({from: web3.eth.defaultAccount,gas:5000000})
     .then(tx =>{
         console.log(tx)
+        web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:true,
@@ -56,7 +61,8 @@ async function tokenize(req,res){
                         }
                     })
     }).catch(error =>{
-        console.log(eror)
+        console.log(error)
+        web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,
@@ -69,12 +75,19 @@ async function tokenize(req,res){
 
 }
 async function setDocument(req,res){
+
+    if(! validator.applyValidations(req,res,5)){
+        return;
+    }
+
     let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
     let privateKey = req.body.privateKey;
-    let account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey);
+    if(privateKey.indexOf('0x') == -1)
+    privateKey = '0x'+privateKey
+    let account = web3.eth.accounts.privateKeyToAccount(privateKey);
     web3.eth.accounts.wallet.add(account);
     web3.eth.defaultAccount = account.address;
 
@@ -87,6 +100,7 @@ async function setDocument(req,res){
     System.methods.setDocument(web3.utils.fromUtf8(name),url,web3.utils.fromUtf8(hash),symbol).send({from: web3.eth.defaultAccount,gas:100000})
     .then(tx =>{
         console.log(tx)
+        web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:true,
@@ -97,6 +111,7 @@ async function setDocument(req,res){
                     })
     }).catch(error =>{
         console.log(eror)
+        web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,
@@ -109,17 +124,17 @@ async function setDocument(req,res){
 }
 async function getDocument(req,res){
     try{
+
+        if(! validator.applyValidations(req,res,2)){
+            return;
+        }
+
     let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
     let name = req.body.docName // MyDoc .. lenght restriction >= 5
     let symbol = req.body.tokenSymbol;
-    let privateKey = req.body.privateKey;
-    
-    let account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey);
-    web3.eth.accounts.wallet.add(account);
-    web3.eth.defaultAccount = account.address;
 
    let assetAddr = await System.methods.getTokenContract(symbol).call();
    let assetAbi = ethUtils.getContracts().rinkeby.AssetTokenization.abi
@@ -151,6 +166,11 @@ async function getDocument(req,res){
 
 async function transfer(req,res){
     try{
+
+        if(! validator.applyValidations(req,res,4)){
+            return;
+        }
+
     let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
@@ -160,7 +180,9 @@ async function transfer(req,res){
     let symbol = req.body.tokenSymbol;
     let privateKey = req.body.privateKey;
     
-    let account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey);
+    if(privateKey.indexOf('0x') == -1)
+    privateKey = '0x'+privateKey
+    let account = web3.eth.accounts.privateKeyToAccount(privateKey);
     web3.eth.accounts.wallet.add(account);
     web3.eth.defaultAccount = account.address;
 
@@ -169,7 +191,7 @@ async function transfer(req,res){
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr); 
    let estimateGas = await assetContract.methods.transfer(to,amount).estimateGas();
    let tx = await assetContract.methods.transfer(to,amount).send({from: web3.eth.defaultAccount,gas:estimateGas})
-    
+   web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:true,
@@ -180,6 +202,7 @@ async function transfer(req,res){
                     })
     }catch(error){
         console.log(error)
+        web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,
@@ -192,13 +215,18 @@ async function transfer(req,res){
 }
 
 async function getBalance(req,res){
+    let symbol;
     try{
+        if(! validator.applyValidations(req,res,2)){
+            return;
+        }
+
     let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
     let address = req.body.address
-    let symbol = req.body.tokenSymbol;
+        symbol = req.body.tokenSymbol;
     
 
    let assetAddr = await System.methods.getTokenContract(symbol).call();
@@ -217,7 +245,17 @@ async function getBalance(req,res){
                     })
     }catch(error){
         console.log(error)
-        res.send(
+        if(error.message.indexOf('did it run Out of Gas?' != -1)){
+            res.send(
+                {
+                    success:true,
+                    data:{
+                        balance: "0 "+symbol
+                        
+                    }
+                }) 
+        }else{
+            res.send(
                     {
                         success:false,
                         data:{
@@ -225,10 +263,18 @@ async function getBalance(req,res){
                             
                         }
                     })
+        }
+        
+        
     }
 }
 async function getAllowance(req,res){
     try{
+
+        if(! validator.applyValidations(req,res,3)){
+            return;
+        }
+
     let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
@@ -267,6 +313,11 @@ async function getAllowance(req,res){
 
 async function approve(req,res){
     try{
+
+        if(! validator.applyValidations(req,res,4)){
+            return;
+        }
+
     let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
@@ -276,7 +327,9 @@ async function approve(req,res){
     let symbol = req.body.tokenSymbol;
     let privateKey = req.body.privateKey;
     
-    let account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey);
+    if(privateKey.indexOf('0x') == -1)
+    privateKey = '0x'+privateKey
+    let account = web3.eth.accounts.privateKeyToAccount(privateKey);
     web3.eth.accounts.wallet.add(account);
     web3.eth.defaultAccount = account.address;
 
@@ -286,7 +339,7 @@ async function approve(req,res){
 
    let estimateGas = await assetContract.methods.approve(spender,amount).estimateGas();
    let tx = await assetContract.methods.approve(spender,amount).send({from: web3.eth.defaultAccount,gas:estimateGas})
-    
+   web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:true,
@@ -297,6 +350,7 @@ async function approve(req,res){
                     })
     }catch(error){
         console.log(error)
+        web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,
@@ -309,6 +363,11 @@ async function approve(req,res){
 }
 async function transferFrom(req,res){
     try{
+
+        if(! validator.applyValidations(req,res,5)){
+            return;
+        }
+
     let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
@@ -319,7 +378,9 @@ async function transferFrom(req,res){
     let symbol = req.body.tokenSymbol;
     let privateKey = req.body.privateKey;
     
-    let account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey);
+    if(privateKey.indexOf('0x') == -1)
+    privateKey = '0x'+privateKey
+    let account = web3.eth.accounts.privateKeyToAccount(privateKey);
     web3.eth.accounts.wallet.add(account);
     web3.eth.defaultAccount = account.address;
 
@@ -329,7 +390,7 @@ async function transferFrom(req,res){
 
    let estimateGas = await assetContract.methods.transferFrom(from,to,amount).estimateGas();
    let tx = await assetContract.methods.transferFrom(from,to,amount).send({from: web3.eth.defaultAccount,gas:estimateGas})
-    
+   web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:true,
@@ -341,6 +402,7 @@ async function transferFrom(req,res){
                 )
     }catch(error){
         console.log(error)
+        web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,
@@ -356,6 +418,11 @@ async function transferFrom(req,res){
 
 async function getTotalSupply(req,res){
     try{
+
+        if(! validator.applyValidations(req,res,1)){
+            return;
+        }
+
     let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
@@ -392,6 +459,11 @@ async function getTotalSupply(req,res){
 
 async function getName(req,res){
     try{
+
+        if(! validator.applyValidations(req,res,1)){
+            return;
+        }
+
     let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
@@ -425,6 +497,53 @@ async function getName(req,res){
                     })
     }
 }
+
+async function issueTokens(req,res){
+
+    if(! validator.applyValidations(req,res,3)){
+        return;
+    }
+
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let system = ethUtils.getContracts().rinkeby.System;
+    let System = new web3.eth.Contract(system.abi,system.address);
+
+    let privateKey = req.body.privateKey;
+    if(privateKey.indexOf('0x') == -1)
+    privateKey = '0x'+privateKey
+    let account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    web3.eth.accounts.wallet.add(account);
+    web3.eth.defaultAccount = account.address;
+
+    let owner = req.body.owner
+    let symbol = req.body.symbol;
+
+    System.methods.issueTokens(symbol,owner).send({from: web3.eth.defaultAccount,gas:2000000})
+    .then(tx =>{
+        console.log(tx)
+        web3.eth.accounts.wallet.clear();
+        res.send(
+                    {
+                        success:true,
+                        data:{
+                            tx
+                            
+                        }
+                    })
+    }).catch(error =>{
+        console.log(eror)
+        web3.eth.accounts.wallet.clear();
+        res.send(
+                    {
+                        success:false,
+                        data:{
+                            error: ""+error
+                            
+                        }
+                    })
+    })
+}
+
 module.exports ={
     createAccount,
     tokenize,
@@ -436,5 +555,6 @@ module.exports ={
     approve,
     transferFrom,
     getTotalSupply,
-    getName
+    getName,
+    issueTokens
 }

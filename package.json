@@ -1,12 +1,14 @@
 {
-  "name": "Tokenization_System erc20 APIs",
+  "name": "Tokenization-System-erc20-APIs",
   "version": "1.0.1",
   "description": "This project contains APIs of a System of asset tokenization",
   "main": "server.js",
   "directories": {
     "test": "test"
   },
-  "scripts": {},
+  "scripts": {
+    "api":"node server.js"
+  },
   "license": "Apache-2",
   "devDependencies": {},
   "dependencies": {

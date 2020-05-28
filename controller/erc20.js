@@ -4,6 +4,7 @@ const validator = require('../utils/validator');
 
 const ethUtils = require("../utils/eth");
 
+
 function createAccount(req,res){
     try{
     let address = wallet.generate();
@@ -43,11 +44,9 @@ async function tokenize(req,res){
     web3.eth.accounts.wallet.add(account);
     web3.eth.defaultAccount = account.address;
 
-    let name = req.body.name //"Asset";
-    let symbol = req.body.symbol // "AST";
-    let supply = req.body.supply //100;
-    // let estimateGas = await System.methods.createToken(name,symbol,supply,owner).estimateGas(); // ()
-    // console.log(estimateGas);
+    let name = req.body.name 
+    let symbol = req.body.symbol 
+    let supply = req.body.supply 
     System.methods.tokenize(name,symbol,supply).send({from: web3.eth.defaultAccount,gas:5000000})
     .then(tx =>{
         console.log(tx)
@@ -62,7 +61,7 @@ async function tokenize(req,res){
                     })
     }).catch(error =>{
         console.log(error)
-        web3.eth.accounts.wallet.clear();
+       // web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,
@@ -91,12 +90,11 @@ async function setDocument(req,res){
     web3.eth.accounts.wallet.add(account);
     web3.eth.defaultAccount = account.address;
 
-    let name = req.body.docName //"Asset";
-    let url = req.body.docURL // "AST";
-    let hash = req.body.docHash //100;
+    let name = req.body.docName 
+    let url = req.body.docURL 
+    let hash = req.body.docHash 
     let symbol = req.body.tokenSymbol;
-    // let estimateGas = await System.methods.setDocument(web3.utils.fromUtf8(name),url,web3.utils.fromUtf8(hash),symbol).estimateGas(); // ()
-    // console.log(estimateGas);
+
     System.methods.setDocument(web3.utils.fromUtf8(name),url,web3.utils.fromUtf8(hash),symbol).send({from: web3.eth.defaultAccount,gas:100000})
     .then(tx =>{
         console.log(tx)
@@ -111,7 +109,7 @@ async function setDocument(req,res){
                     })
     }).catch(error =>{
         console.log(eror)
-        web3.eth.accounts.wallet.clear();
+       //  web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,
@@ -133,14 +131,16 @@ async function getDocument(req,res){
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
-    let name = req.body.docName // MyDoc .. lenght restriction >= 5
+    let name = req.body.docName 
     let symbol = req.body.tokenSymbol;
 
    let assetAddr = await System.methods.getTokenContract(symbol).call();
+   if(assetAddr == '0x0000000000000000000000000000000000000000')
+   throw(symbol+" contract isn't found");
    let assetAbi = ethUtils.getContracts().rinkeby.AssetTokenization.abi
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr); 
-  // let estimateGas = await assetContract.methods.getDocument(web3.utils.fromUtf8(name)).estimateGas();
-   let document = await assetContract.methods.getDocument(web3.utils.fromUtf8(name)).call() //.send({from: web3.eth.defaultAccount,gas:estimateGas})
+
+   let document = await assetContract.methods.getDocument(web3.utils.fromUtf8(name)).call() 
     
         res.send(
                     {
@@ -187,10 +187,13 @@ async function transfer(req,res){
     web3.eth.defaultAccount = account.address;
 
    let assetAddr = await System.methods.getTokenContract(symbol).call();
+   if(assetAddr == '0x0000000000000000000000000000000000000000')
+   throw(symbol+" contract isn't found");
+   
    let assetAbi = ethUtils.getContracts().rinkeby.AssetTokenization.abi
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr); 
-   let estimateGas = await assetContract.methods.transfer(to,amount).estimateGas();
-   let tx = await assetContract.methods.transfer(to,amount).send({from: web3.eth.defaultAccount,gas:estimateGas})
+//   let estimateGas = await assetContract.methods.transfer(to,amount).estimateGas();
+   let tx = await assetContract.methods.transfer(to,amount).send({from: web3.eth.defaultAccount,gas:1000000})
    web3.eth.accounts.wallet.clear();
         res.send(
                     {
@@ -202,7 +205,7 @@ async function transfer(req,res){
                     })
     }catch(error){
         console.log(error)
-        web3.eth.accounts.wallet.clear();
+        // web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,
@@ -230,10 +233,12 @@ async function getBalance(req,res){
     
 
    let assetAddr = await System.methods.getTokenContract(symbol).call();
+   if(assetAddr == '0x0000000000000000000000000000000000000000')
+   throw(symbol+" contract isn't found");
    let assetAbi = ethUtils.getContracts().rinkeby.AssetTokenization.abi
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr); 
-  // let estimateGas = await assetContract.methods.getDocument(web3.utils.fromUtf8(name)).estimateGas();
-   let balance = await assetContract.methods.balanceOf(address).call() //.send({from: web3.eth.defaultAccount,gas:estimateGas})
+
+   let balance = await assetContract.methods.balanceOf(address).call()
     
         res.send(
                     {
@@ -285,10 +290,12 @@ async function getAllowance(req,res){
     
 
    let assetAddr = await System.methods.getTokenContract(symbol).call();
+   if(assetAddr == '0x0000000000000000000000000000000000000000')
+   throw(symbol+" contract isn't found");
    let assetAbi = ethUtils.getContracts().rinkeby.AssetTokenization.abi
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr); 
-  // let estimateGas = await assetContract.methods.getDocument(web3.utils.fromUtf8(name)).estimateGas();
-   let allowance = await assetContract.methods.allowance(owner,spender).call() //.send({from: web3.eth.defaultAccount,gas:estimateGas})
+
+   let allowance = await assetContract.methods.allowance(owner,spender).call() 
     
         res.send(
                     {
@@ -334,11 +341,13 @@ async function approve(req,res){
     web3.eth.defaultAccount = account.address;
 
    let assetAddr = await System.methods.getTokenContract(symbol).call();
+   if(assetAddr == '0x0000000000000000000000000000000000000000')
+   throw(symbol+" contract isn't found");
    let assetAbi = ethUtils.getContracts().rinkeby.AssetTokenization.abi
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr); 
 
-   let estimateGas = await assetContract.methods.approve(spender,amount).estimateGas();
-   let tx = await assetContract.methods.approve(spender,amount).send({from: web3.eth.defaultAccount,gas:estimateGas})
+ //  let estimateGas = await assetContract.methods.approve(spender,amount).estimateGas();
+   let tx = await assetContract.methods.approve(spender,amount).send({from: web3.eth.defaultAccount,gas:1000000})
    web3.eth.accounts.wallet.clear();
         res.send(
                     {
@@ -350,7 +359,7 @@ async function approve(req,res){
                     })
     }catch(error){
         console.log(error)
-        web3.eth.accounts.wallet.clear();
+      //  web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,
@@ -385,11 +394,14 @@ async function transferFrom(req,res){
     web3.eth.defaultAccount = account.address;
 
    let assetAddr = await System.methods.getTokenContract(symbol).call();
+   if(assetAddr == '0x0000000000000000000000000000000000000000')
+   throw(symbol+" contract isn't found");
    let assetAbi = ethUtils.getContracts().rinkeby.AssetTokenization.abi
+
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr); 
 
-   let estimateGas = await assetContract.methods.transferFrom(from,to,amount).estimateGas();
-   let tx = await assetContract.methods.transferFrom(from,to,amount).send({from: web3.eth.defaultAccount,gas:estimateGas})
+ //  let estimateGas = await assetContract.methods.transferFrom(from,to,amount).estimateGas();
+   let tx = await assetContract.methods.transferFrom(from,to,amount).send({from: web3.eth.defaultAccount,gas:1000000})
    web3.eth.accounts.wallet.clear();
         res.send(
                     {
@@ -402,7 +414,7 @@ async function transferFrom(req,res){
                 )
     }catch(error){
         console.log(error)
-        web3.eth.accounts.wallet.clear();
+        // web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,
@@ -431,6 +443,8 @@ async function getTotalSupply(req,res){
     
 
    let assetAddr = await System.methods.getTokenContract(symbol).call();
+   if(assetAddr == '0x0000000000000000000000000000000000000000')
+   throw(symbol+" contract isn't found");
    let assetAbi = ethUtils.getContracts().rinkeby.AssetTokenization.abi
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr);
 
@@ -472,6 +486,8 @@ async function getName(req,res){
     
 
    let assetAddr = await System.methods.getTokenContract(symbol).call();
+   if(assetAddr == '0x0000000000000000000000000000000000000000')
+   throw(symbol+" contract isn't found");
    let assetAbi = ethUtils.getContracts().rinkeby.AssetTokenization.abi
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr);
 
@@ -532,7 +548,7 @@ async function issueTokens(req,res){
                     })
     }).catch(error =>{
         console.log(eror)
-        web3.eth.accounts.wallet.clear();
+       //  web3.eth.accounts.wallet.clear();
         res.send(
                     {
                         success:false,

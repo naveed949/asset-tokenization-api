@@ -21,6 +21,10 @@ const getEthNetwork = () =>{
     return network;
 }
 
+/**
+ * Once you've deployed System contract on mainnet,
+ *  paste its address in below mentioned field of this function.
+ */
 const getContracts = () =>{
     let contracts = {
         rinkeby:{
@@ -34,7 +38,7 @@ const getContracts = () =>{
         },
         mainnet:{
             System:{
-                address:'',
+                address:'ENTER MAINNET SYSTEM CONTRACT ADDRESS',
                 abi: System.abi
             },
             AssetTokenization:{

@@ -3,7 +3,12 @@ const Web3 = require('web3');
 const validator = require('../utils/validator');
 
 const ethUtils = require("../utils/eth");
-
+/**
+ * In case you want to switch these APIs from rinkeby to mainnet
+ *  1. change NETWORK = mainnet
+ *  2. add mainnet.System contract address in ethUtils.getContracts()
+ */
+const NETWORK = "rinkeby";
 
 function createAccount(req,res){
     try{
@@ -33,7 +38,7 @@ async function tokenize(req,res){
         return;
     }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
@@ -79,7 +84,7 @@ async function setDocument(req,res){
         return;
     }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
@@ -127,7 +132,7 @@ async function getDocument(req,res){
             return;
         }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
@@ -171,7 +176,7 @@ async function transfer(req,res){
             return;
         }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
@@ -224,7 +229,7 @@ async function getBalance(req,res){
             return;
         }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
@@ -280,7 +285,7 @@ async function getAllowance(req,res){
             return;
         }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
@@ -325,7 +330,7 @@ async function approve(req,res){
             return;
         }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
@@ -377,7 +382,7 @@ async function transferFrom(req,res){
             return;
         }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
@@ -435,7 +440,7 @@ async function getTotalSupply(req,res){
             return;
         }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
@@ -478,7 +483,7 @@ async function getName(req,res){
             return;
         }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 
@@ -520,7 +525,7 @@ async function issueTokens(req,res){
         return;
     }
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork().rinkeby));
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
     let system = ethUtils.getContracts().rinkeby.System;
     let System = new web3.eth.Contract(system.abi,system.address);
 

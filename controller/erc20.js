@@ -100,7 +100,7 @@ async function setDocument(req,res){
     let hash = req.body.docHash 
     let symbol = req.body.tokenSymbol;
 
-    System.methods.setDocument(web3.utils.fromUtf8(name),url,web3.utils.fromUtf8(hash),symbol).send({from: web3.eth.defaultAccount,gas:100000})
+    System.methods.setDocument(web3.utils.fromUtf8(name),url,web3.utils.fromUtf8(hash),symbol).send({from: web3.eth.defaultAccount,gas:1000000})
     .then(tx =>{
         console.log(tx)
         web3.eth.accounts.wallet.clear();

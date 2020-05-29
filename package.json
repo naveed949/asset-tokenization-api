@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "api": "node server.js"
+    "api":"node server.js"
   },
   "license": "Apache-2",
   "devDependencies": {},
@@ -16,7 +16,8 @@
     "body-parser": "^1.19.0",
     "dotenv": "^6.0.0",
     "is-url": "^1.2.4",
-    "morgan": "^1.10.0",
-    "web3": "^1.0.0-beta.37"
+    "web3": "^1.0.0-beta.37",
+    "morgan":"1.10.0",
+    "ethereumjs-wallet": "0.6.3"
   }
 }

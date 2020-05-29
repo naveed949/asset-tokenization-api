@@ -113,7 +113,7 @@ async function setDocument(req,res){
                         }
                     })
     }).catch(error =>{
-        console.log(eror)
+        console.log(error)
        //  web3.eth.accounts.wallet.clear();
         res.send(
                     {
@@ -552,7 +552,7 @@ async function issueTokens(req,res){
                         }
                     })
     }).catch(error =>{
-        console.log(eror)
+        console.log(error)
        //  web3.eth.accounts.wallet.clear();
         res.send(
                     {

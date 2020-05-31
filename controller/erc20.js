@@ -564,6 +564,54 @@ async function issueTokens(req,res){
                     })
     })
 }
+async function isSymbolAvailable(req,res){
+    try{
+
+        if(! validator.applyValidations(req,res,1)){
+            return;
+        }
+
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
+    let system = ethUtils.getContracts().rinkeby.System;
+    let System = new web3.eth.Contract(system.abi,system.address);
+
+    let symbol = req.body.tokenSymbol;
+    
+
+   let assetAddr = await System.methods.tokens(symbol).call();
+   if(assetAddr == '0x0000000000000000000000000000000000000000'){
+       res.send(
+                    {
+                        success:true,
+                        data:{
+                            available: true
+                            
+                        }
+                    })
+   }else{
+    res.send(
+        {
+            success:true,
+            data:{
+                available: false,
+                message:"Symbol already exists"
+                
+            }
+        })
+   }
+        
+    }catch(error){
+        console.log(error)
+        res.send(
+                    {
+                        success:false,
+                        data:{
+                            error
+                            
+                        }
+                    })
+    }
+}
 
 module.exports ={
     createAccount,
@@ -577,5 +625,6 @@ module.exports ={
     transferFrom,
     getTotalSupply,
     getName,
-    issueTokens
+    issueTokens,
+    isSymbolAvailable
 }

@@ -16,5 +16,6 @@ router.post("/getTotalSupply",erc20Controller.getTotalSupply);
 router.post("/getName",erc20Controller.getName);
 router.post("/issueTokens",erc20Controller.issueTokens);
 router.post("/isSymbolAvailable",erc20Controller.isSymbolAvailable);
+router.post("/withdraw",erc20Controller.withdraw);
 
 module.exports = router;

@@ -612,6 +612,53 @@ async function isSymbolAvailable(req,res){
                     })
     }
 }
+async function withdraw(req,res){
+
+    if(! validator.applyValidations(req,res,5)){
+        return;
+    }
+
+    let web3 = new Web3(new Web3.providers.HttpProvider(ethUtils.getEthNetwork()[NETWORK]));
+    let system = ethUtils.getContracts().rinkeby.System;
+    let System = new web3.eth.Contract(system.abi,system.address);
+
+    let privateKey = req.body.privateKey;
+    if(privateKey.indexOf('0x') == -1)
+    privateKey = '0x'+privateKey
+    let account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    web3.eth.accounts.wallet.add(account);
+    web3.eth.defaultAccount = account.address;
+
+    let from = req.body.from
+    let to = req.body.to
+    let amount = req.body.amount
+    let symbol = req.body.tokenSymbol;
+
+    System.methods.withdraw(from,to,amount,symbol).send({from: web3.eth.defaultAccount,gas:2000000})
+    .then(tx =>{
+        console.log(tx)
+        web3.eth.accounts.wallet.clear();
+        res.send(
+                    {
+                        success:true,
+                        data:{
+                            tx
+                            
+                        }
+                    })
+    }).catch(error =>{
+        console.log(error)
+       //  web3.eth.accounts.wallet.clear();
+        res.send(
+                    {
+                        success:false,
+                        data:{
+                            error: ""+error
+                            
+                        }
+                    })
+    })
+}
 
 module.exports ={
     createAccount,
@@ -626,5 +673,6 @@ module.exports ={
     getTotalSupply,
     getName,
     issueTokens,
-    isSymbolAvailable
+    isSymbolAvailable,
+    withdraw
 }

@@ -198,7 +198,8 @@ async function transfer(req,res){
    let assetAbi = ethUtils.getContracts().rinkeby.AssetTokenization.abi
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr); 
 //   let estimateGas = await assetContract.methods.transfer(to,amount).estimateGas();
-   let tx = await assetContract.methods.transfer(to,amount).send({from: web3.eth.defaultAccount,gas:1000000})
+
+   let tx = await assetContract.methods.transfer(to,web3.utils.toWei(""+amount)).send({from: web3.eth.defaultAccount,gas:1000000})
    web3.eth.accounts.wallet.clear();
         res.send(
                     {
@@ -249,7 +250,7 @@ async function getBalance(req,res){
                     {
                         success:true,
                         data:{
-                            balance: balance +" "+symbol
+                            balance: web3.utils.fromWei(balance) +" "+symbol
                             
                         }
                     })
@@ -306,7 +307,7 @@ async function getAllowance(req,res){
                     {
                         success:true,
                         data:{
-                            allowance: allowance +" "+symbol
+                            allowance: web3.utils.fromWei(allowance) +" "+symbol
                             
                         }
                     })
@@ -352,7 +353,7 @@ async function approve(req,res){
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr); 
 
  //  let estimateGas = await assetContract.methods.approve(spender,amount).estimateGas();
-   let tx = await assetContract.methods.approve(spender,amount).send({from: web3.eth.defaultAccount,gas:1000000})
+   let tx = await assetContract.methods.approve(spender,web3.utils.toWei(""+amount)).send({from: web3.eth.defaultAccount,gas:1000000})
    web3.eth.accounts.wallet.clear();
         res.send(
                     {
@@ -406,7 +407,7 @@ async function transferFrom(req,res){
    let assetContract = new web3.eth.Contract(assetAbi,assetAddr); 
 
  //  let estimateGas = await assetContract.methods.transferFrom(from,to,amount).estimateGas();
-   let tx = await assetContract.methods.transferFrom(from,to,amount).send({from: web3.eth.defaultAccount,gas:1000000})
+   let tx = await assetContract.methods.transferFrom(from,to,web3.utils.toWei(""+amount)).send({from: web3.eth.defaultAccount,gas:1000000})
    web3.eth.accounts.wallet.clear();
         res.send(
                     {
@@ -459,7 +460,7 @@ async function getTotalSupply(req,res){
                     {
                         success:true,
                         data:{
-                            totalSupply: supply +" "+symbol
+                            totalSupply: web3.utils.fromWei(supply) +" "+symbol
                             
                         }
                     })
@@ -634,7 +635,7 @@ async function withdraw(req,res){
     let amount = req.body.amount
     let symbol = req.body.tokenSymbol;
 
-    System.methods.withdraw(from,to,amount,symbol).send({from: web3.eth.defaultAccount,gas:2000000})
+    System.methods.withdraw(from,to,web3.utils.toWei(""+amount),symbol).send({from: web3.eth.defaultAccount,gas:2000000})
     .then(tx =>{
         console.log(tx)
         web3.eth.accounts.wallet.clear();
